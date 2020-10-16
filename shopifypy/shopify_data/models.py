@@ -1,6 +1,29 @@
 from django.db import models
-# Create your models here.
 from django.db import models
+
+
+class PriceRule(models.Model):
+    allocation_method = models.CharField(max_length=20)
+    created_at=models.DateField(required=False)
+    updated_at = models.DateField(required=False)    
+    customer_selection = models.CharField(max_length=200)
+    ends_at = models.DateField(required=False)
+    id = models.CharField(max_length=200,primary_key=True)
+    once_per_customer = models.BooleanField(default=True)
+    prerequisite_quantity_range = models.IntegerField(default=1)
+    prerequisite_shipping_price_range = models.CharField(max_length=200,required=False)
+    prerequisite_subtotal_range = models.FloatField(default=0.0)
+    prerequisite_purchase = models.FloatField(default=0.0)
+    starts_at = models.DateField(required=False)
+    target_selection = models.CharField(max_length=200,required=False)
+    target_type = models.CharField(max_length=200,required=False)
+    title= models.CharField(max_length=200)
+    usage_limit = models.IntegerField(default=10)
+
+class PriceRuleSavedSearch(models.Model):
+    price_rule = models.ForeignKey(PriceRule,on_delete=models.CASCADE)
+    saved_search = models.CharField(max_length=200)
+
 
 class DiscountCode(models.Model):
     id = models.CharField(max_length=200,primary_key=True)
@@ -48,6 +71,7 @@ class Address(models.Model):
     last_name = models.CharField(max_length=1000,default='',required=False)
     billing_Address_type = models.CharField(max_length=20,default='',required=False)
 
+
 class Customer(models.Model):
     id = models.CharField(max_length=200,primary_key=True)
     email = models.EmailField(required=False)
@@ -68,6 +92,9 @@ class Customer(models.Model):
     marketing_optin_level = models.CharField(max_length=100,default='',required=False)
     customer_address = models.ManyToManyField(Address,on_delete=models.CASCADE)
 
+class PrerequisiteCustomer(models.Model):
+    price_rule_id = models.ForeignKey(PriceRule,on_delete=models.CASCADE)
+    customer_id = models.ForeignKey(Customer,on_delete =models.CASCADE)
 
 class AbandonCart(models.Model):
     buyer_accepts_marketing=models.BooleanField(default=False)
@@ -157,6 +184,10 @@ class Collection(models.Model):
     title = models.CharField(max_length=200,default='')
     update_at = models.DateField(required=False)
 
+class PriceRuleEntity(models.Model):
+    price_rule_id = models.ForeignKey(PriceRule,on_delete=models.CASCADE)
+    collection_id = models.ForeignKey(Collection,on_delete=models.CASCADE)
+
 class Product(models.Model):
     body_html = models.CharField(max_length=2000,required=False,default='')
     handle = models.CharField(max_length=200,required=False,default='')
@@ -174,6 +205,15 @@ class Product(models.Model):
     title = models.CharField(max_length=200,required=False,default='')
     vendor = models.CharField(max_length=200,required=False,default='')
 
+class PrerequisiteProducts(models.Model):
+    pricerule_id = models.ForeignKey(PriceRule,on_delete=models.CASCADE)
+    product_id = models.ForeignKey(Product,on_delete=models.CASCADE)
+
+
+class PriceRuleProduct(models.Model):
+    price_rule_id = models.ForeignKey(PriceRule,on_delete=models.CASCADE)
+    product_id = models.ForeignKey(Product,on_delete=models.CASCADE)
+
 class ProductImage(models.Model):
     product_id = models.ForeignKey(Product,on_delete=models.CASCADE)
     id = models.CharField(max_length=200,primary_key=True)
@@ -190,6 +230,7 @@ class Collect(models.Model):
     position = models.IntegerField(default=-1)
     product_id = models.ForeignKey(Product,on_delete=False)
     updated_at = models.DateField(required=False)
+
 
 class CollectionImage(models.Model):
     collection_id = models.ForeignKey(Collection,on_delete=models.CASCADE)
@@ -234,6 +275,14 @@ class ProductVariant(models.Model):
     updated_at = models.DateField(required=False)
     weight = models.FloatField(default=0.0)
     weight_unit = models.FloatField(max_length=10)        
+
+class PrerequisiteVariants(models.Model):
+    pricerule_id=models.ForeignKey(PriceRule,on_delete=models.CASCADE)
+    varaint_id = models.ForeignKey(ProductVariant,on_delete=models.CASCADE)
+
+class PriceProductVariant(models.Model):
+    price_rule_id = models.ForeignKey(PriceRule,on_delete=models.CASCADE)
+    product_variant_id = models.ForeignKey(ProductVariant,on_delete=models.CASCADE)
 
 
 class AbandonCartLineItem(models.Model):

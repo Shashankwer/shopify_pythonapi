@@ -73,5 +73,59 @@ class ShopifyStoreClient():
             return None
         return webhook_count_response['count']
 #Create code for mapping API to object type
+"""
+For the Shopify following are the different rules: 
+<https://{shop}.myshopify.com/admin/api/{version}/products.json?page_info={page_info}&limit={limit}>; rel={next}, <https://{shop}.myshopify.com/admin/api/{version}/products.json?page_info={page_info}&limit={limit}>; rel={previous}
+
+Shopify REST end points support the cursor based pagination. When one sends a request to on of these endpoints, the response body returns the first page of results. 
+The reponse header returns a link to the next page and the previous page of results. 
+One can use the link in the response header to iterate through the pages of results. 
+
+The link header includes a rel parameter, where relation-types describe the relation of the link page to the current page of results. 
+The value can either be previous or next. 
+
+If one intial request does not return enough to generate an additional page of results.
+The URL in the link header can include up tom 3 parameters: 
+1.page_info: A unique ID used to access a certain page of results. The page_info parameter cant be modified and must be used exactly as it appears in the link header URL
+2. limit: The maximum number of results to show on the page
+3. fields: A comma-separated litst of which fields to show in the results. This parameter only works for some endpoints
+
+A request that include the page_info parameter except for limit and fields (if it appears to the endpoints)
+If we want the results to be only filtered by the other parameters. Then to include those paramters in the first request to make
+Any request that sends the page parameter will return  an error
+
+e.g. requesting only 3 products page per result
+
+GET https://{shop}.myshopify.com/admin/api/2019-07/products.json?limit=3&collection_id=841564295
+Response header: 
+Link: "<https://{shop}.myshopify.com/admin/api/2019-07/products.json?page_info=hijgklmn&limit=3>; rel=next"
+{
+  "products": [
+    {id: 1 ... },
+    {id: 2 ... },
+    {id: 3 ... }
+  ],
+}
+
+Inorder to go to the next page of results one can make a request to the URL stored in the link header of the last response. 
+GET https://{shop}.myshopify.com/admin/api/2019-07/products.json?page_info=hijgklmn&limit=3
+Since it includes a page info we cannot add any additional fields apart limit. 
+Link: "<https://{shop}.myshopify.com/admin/api/2019-07/products.json?page_info=abcdefg&limit=3>; rel=previous, <https://{shop}.myshopify.com/admin/api/2019-07/products.json?page_info=opqrstu&limit=3>; rel=next"
+{
+  "products": [
+    {id: 4 ... },
+    {id: 5 ... },
+    {id: 6 ... }
+  ],
+}
+
+
+"""
+
+    def dataPushDiscountCode(self):
+
+
+        DiscountCode()
+
 
 
